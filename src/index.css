@@ -43,6 +43,10 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 210 100% 52%;
+    
+    /* DiekerIT colors */
+    --diekerit-blue: 203 100% 39%;
+    --diekerit-green: 156 95% 56%;
   }
 }
 
@@ -52,7 +56,96 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground relative min-h-screen;
+  }
+}
+
+/* Animierter Gradient-Hintergrund */
+.gradient-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background: linear-gradient(45deg, hsl(var(--diekerit-blue)), hsl(var(--diekerit-green)));
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Glassmorphism-Effekt */
+.glass {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* DiekerIT Farbpalette */
+.diekerit-gradient-text {
+  @apply bg-clip-text text-transparent;
+  background-image: linear-gradient(90deg, hsl(var(--diekerit-blue)), hsl(var(--diekerit-green)));
+}
+
+.diekerit-gradient-bg {
+  background-image: linear-gradient(90deg, hsl(var(--diekerit-blue)), hsl(var(--diekerit-green)));
+}
+
+.diekerit-border {
+  border: 1px solid transparent;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), 
+                    linear-gradient(90deg, hsl(var(--diekerit-blue)), hsl(var(--diekerit-green)));
+}
+
+/* Animationen */
+.hover-scale {
+  @apply transition-transform duration-300;
+}
+.hover-scale:hover {
+  transform: scale(1.03);
+}
+
+.pulse-effect {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -68,4 +161,50 @@
 
 ::-webkit-scrollbar-thumb {
   @apply bg-muted rounded-full;
+}
+
+/* Status Farben und Badges */
+.status-online {
+  background: linear-gradient(90deg, #10B981, #34D399);
+}
+
+.status-warning {
+  background: linear-gradient(90deg, #F59E0B, #FBBF24);
+}
+
+.status-offline {
+  background: linear-gradient(90deg, #EF4444, #F87171);
+}
+
+/* Card Styles */
+.monitor-card {
+  @apply glass rounded-xl overflow-hidden transition-all duration-300;
+  transform: perspective(1000px) rotateX(0deg);
+}
+
+.monitor-card:hover {
+  transform: perspective(1000px) rotateX(2deg) scale(1.02);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Button Styles */
+.glow-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+  transform: rotate(30deg);
+  transition: transform 0.7s;
+}
+
+.glow-button:hover::after {
+  transform: rotate(30deg) translate(50%, 50%);
 }

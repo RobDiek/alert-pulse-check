@@ -1,44 +1,100 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Activity, PlusCircle, History, Settings } from "lucide-react";
+import { Activity, LayoutDashboard, History as HistoryIcon, PlusCircle, Server, Network } from "lucide-react";
 
-export const Navbar: React.FC = () => {
+export const Navbar = () => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
   return (
-    <nav className="bg-card border-b border-muted">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/dashboard" className="flex items-center space-x-2">
-            <Activity className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">ServMonitor</span>
-          </Link>
-        </div>
-        
-        <div className="hidden md:flex items-center space-x-4">
-          <Link to="/dashboard">
-            <Button variant="ghost">Dashboard</Button>
-          </Link>
-          <Link to="/history">
-            <Button variant="ghost">
-              <History className="h-4 w-4 mr-2" />
-              Verlauf
-            </Button>
-          </Link>
-          <Link to="/add-service">
-            <Button>
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Neuer Dienst
-            </Button>
-          </Link>
-        </div>
-        
-        <div className="flex items-center">
-          <Button variant="ghost" size="icon">
-            <Settings className="h-5 w-5" />
-          </Button>
+    <header className="glass border-b border-white/10 sticky top-0 z-50">
+      <div className="container mx-auto py-3 px-4">
+        <div className="flex justify-between items-center">
+          {/* Logo und Titel */}
+          <div className="flex items-center">
+            <Activity className="h-6 w-6 text-diekerit-green mr-2" />
+            <span className="text-xl font-bold diekerit-gradient-text">ServMonitor</span>
+          </div>
+          
+          {/* Navigation */}
+          <nav className="hidden md:flex space-x-1">
+            <NavButton 
+              to="/dashboard" 
+              icon={<LayoutDashboard className="h-4 w-4" />} 
+              label="Dashboard" 
+              active={currentPath === "/dashboard"} 
+            />
+            <NavButton 
+              to="/server-monitoring" 
+              icon={<Server className="h-4 w-4" />} 
+              label="Server & DNS" 
+              active={currentPath === "/server-monitoring"} 
+            />
+            <NavButton 
+              to="/history" 
+              icon={<HistoryIcon className="h-4 w-4" />} 
+              label="Verlauf" 
+              active={currentPath === "/history"} 
+            />
+            <NavButton 
+              to="/add-service" 
+              icon={<PlusCircle className="h-4 w-4" />} 
+              label="Hinzufügen" 
+              active={currentPath === "/add-service"} 
+            />
+          </nav>
+          
+          {/* Mobile-Ansicht anpassen */}
+          <div className="md:hidden flex space-x-1">
+            <NavButton 
+              to="/dashboard" 
+              icon={<LayoutDashboard className="h-4 w-4" />} 
+              active={currentPath === "/dashboard"} 
+            />
+            <NavButton 
+              to="/server-monitoring" 
+              icon={<Server className="h-4 w-4" />} 
+              active={currentPath === "/server-monitoring"} 
+            />
+            <NavButton 
+              to="/history" 
+              icon={<HistoryIcon className="h-4 w-4" />} 
+              active={currentPath === "/history"} 
+            />
+            <NavButton 
+              to="/add-service" 
+              icon={<PlusCircle className="h-4 w-4" />} 
+              active={currentPath === "/add-service"} 
+            />
+          </div>
         </div>
       </div>
-    </nav>
+    </header>
+  );
+};
+
+// Hilfsfunktion für die Navigationsbuttons
+const NavButton = ({ to, icon, label, active }: { 
+  to: string; 
+  icon: React.ReactNode;
+  label?: string;
+  active: boolean;
+}) => {
+  return (
+    <Link to={to}>
+      <Button
+        variant={active ? "default" : "ghost"}
+        className={active 
+          ? "diekerit-gradient-bg hover:opacity-90" 
+          : "hover:bg-white/5 text-foreground/70 hover:text-foreground"
+        }
+        size={label ? "default" : "icon"}
+      >
+        {icon}
+        {label && <span className="ml-2">{label}</span>}
+      </Button>
+    </Link>
   );
 };
