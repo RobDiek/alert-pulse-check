@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { DiekerLayout } from "@/components/DiekerLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,17 @@ import {
   ChartTooltip, 
   ChartTooltipContent
 } from "@/components/ui/chart";
-import { Cpu, Memory, Database, HardDrive, Network, Activity, Download, Upload } from "lucide-react";
+import { 
+  Cpu, 
+  HardDrive, 
+  Network, 
+  Activity, 
+  Download, 
+  Upload,
+  Server,
+  Database,
+  Globe
+} from "lucide-react";
 import { 
   LineChart, 
   Line, 
@@ -225,7 +234,7 @@ const ServerMonitoring: React.FC = () => {
                       </div>
                       <div className="flex flex-col p-3 glass rounded-md">
                         <div className="flex items-center text-xs text-muted-foreground mb-1">
-                          <Memory className="h-3.5 w-3.5 mr-1" />
+                          <Server className="h-3.5 w-3.5 mr-1" />
                           <span>RAM</span>
                         </div>
                         <div className="text-2xl font-bold">
