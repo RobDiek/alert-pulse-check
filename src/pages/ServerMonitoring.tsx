@@ -31,6 +31,11 @@ import {
   AreaChart,
   Area
 } from "recharts";
+import { toast } from "@/components/ui/use-toast";
+import { AddServerForm, ServerFormValues } from "@/components/AddServerForm";
+import { AddDnsServerForm, DnsServerFormValues } from "@/components/AddDnsServerForm";
+import { AddDomainMonitorForm, DomainMonitorFormValues } from "@/components/AddDomainMonitorForm";
+import { AgentConfigGenerator } from "@/components/AgentConfigGenerator";
 
 // Mock-Daten für Server-Metriken
 const generateMockServerData = (hours = 24, baseValue = 50, fluctuation = 20) => {
@@ -133,6 +138,87 @@ const ServerMonitoring: React.FC = () => {
   const [activeServer, setActiveServer] = useState(mockServers[0]);
   const [activeDns, setActiveDns] = useState(mockDnsServers[0]);
   const [timeRange, setTimeRange] = useState<"6h" | "24h" | "7d">("24h");
+  
+  // State für Dialoge
+  const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
+  const [addDnsServerDialogOpen, setAddDnsServerDialogOpen] = useState(false);
+  const [addDomainDialogOpen, setAddDomainDialogOpen] = useState(false);
+
+  // State für Server-Listen
+  const [servers, setServers] = useState(mockServers);
+  const [dnsServers, setDnsServers] = useState(mockDnsServers);
+  const [monitoredDomains, setMonitoredDomains] = useState([
+    { domain: "example.com", status: "active" },
+    { domain: "test-domain.de", status: "active" }
+  ]);
+
+  // Füge state für den API-Config-Generator hinzu
+  const [agentConfigOpen, setAgentConfigOpen] = useState(false);
+
+  // Handler für das Hinzufügen eines neuen Servers
+  const handleAddServer = async (data: ServerFormValues) => {
+    // In einer echten App würdest du hier eine API-Anfrage senden
+    console.log("Adding server:", data);
+    
+    // Simuliere eine Netzwerkanfrage
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Erstelle einen neuen Server mit Mock-Daten
+    const newServer = {
+      id: `server${servers.length + 1}`,
+      name: data.name,
+      hostname: data.hostname,
+      ip: data.ip,
+      status: "online" as const,
+      data: generateMockServerData(24, 40, 30)
+    };
+    
+    // Füge den Server zur Liste hinzu
+    setServers([...servers, newServer]);
+    
+    // Zeige eine Erfolgsmeldung
+    toast({
+      title: "Server hinzugefügt",
+      description: `${data.name} wurde erfolgreich zur Überwachung hinzugefügt.`,
+    });
+  };
+
+  // Handler für das Hinzufügen eines neuen DNS-Servers
+  const handleAddDnsServer = async (data: DnsServerFormValues) => {
+    // In einer echten App würdest du hier eine API-Anfrage senden
+    console.log("Adding DNS server:", data);
+    
+    // Simuliere eine Netzwerkanfrage
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Erstelle einen neuen DNS-Server mit Mock-Daten
+    const newDnsServer = {
+      id: `dns${dnsServers.length + 1}`,
+      name: data.name,
+      hostname: data.hostname,
+      ip: data.ip,
+      status: "online" as const,
+      data: generateMockDnsData(24)
+    };
+    
+    // Füge den DNS-Server zur Liste hinzu
+    setDnsServers([...dnsServers, newDnsServer]);
+  };
+
+  // Handler für das Hinzufügen einer neuen Domain zur Überwachung
+  const handleAddDomain = async (data: DomainMonitorFormValues) => {
+    // In einer echten App würdest du hier eine API-Anfrage senden
+    console.log("Adding domain monitoring:", data);
+    
+    // Simuliere eine Netzwerkanfrage
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Füge die Domain zur Liste hinzu
+    setMonitoredDomains([...monitoredDomains, { 
+      domain: data.domain, 
+      status: "active" 
+    }]);
+  };
 
   return (
     <DiekerLayout>
@@ -159,7 +245,7 @@ const ServerMonitoring: React.FC = () => {
                     <CardTitle className="text-lg font-medium">Server</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {mockServers.map((server) => (
+                    {servers.map((server) => (
                       <button
                         key={server.id}
                         className={`w-full text-left p-3 rounded-md transition-all flex items-center justify-between ${
@@ -179,7 +265,10 @@ const ServerMonitoring: React.FC = () => {
                       </button>
                     ))}
                     
-                    <Button className="w-full mt-4 glass border-white/10 hover:bg-white/10">
+                    <Button 
+                      className="w-full mt-4 glass border-white/10 hover:bg-white/10"
+                      onClick={() => setAddServerDialogOpen(true)}
+                    >
                       Server hinzufügen
                     </Button>
                   </CardContent>
@@ -418,25 +507,18 @@ const ServerMonitoring: React.FC = () => {
                         Installiere unseren leichtgewichtigen Agent, um detaillierte System-Metriken zu sammeln und in Echtzeit an ServMonitor zu senden.
                       </p>
                       
-                      <div className="glass border-white/10 rounded-md p-3">
-                        <p className="text-sm font-mono text-muted-foreground mb-1">Linux/macOS Installation:</p>
-                        <code className="text-xs bg-black/20 p-2 rounded block w-full font-mono overflow-auto">
-                          curl -sSL https://servmonitor.diekerit.de/install.sh | sudo bash -s -- --token=API_TOKEN_HERE
-                        </code>
-                      </div>
-                      
-                      <div className="glass border-white/10 rounded-md p-3">
-                        <p className="text-sm font-mono text-muted-foreground mb-1">Windows PowerShell:</p>
-                        <code className="text-xs bg-black/20 p-2 rounded block w-full font-mono overflow-auto">
-                          Invoke-WebRequest -Uri "https://servmonitor.diekerit.de/install.ps1" -OutFile ".\install.ps1"; .\install.ps1 -ApiToken "API_TOKEN_HERE"
-                        </code>
-                      </div>
-                      
                       <div className="flex gap-2">
-                        <Button className="diekerit-gradient-bg hover:opacity-90 glow-button">
-                          API-Token generieren
+                        <Button 
+                          className="diekerit-gradient-bg hover:opacity-90 glow-button"
+                          onClick={() => setAgentConfigOpen(true)}
+                        >
+                          Agent konfigurieren
                         </Button>
-                        <Button variant="outline" className="glass border-white/10 hover:bg-white/10">
+                        <Button 
+                          variant="outline" 
+                          className="glass border-white/10 hover:bg-white/10"
+                          onClick={() => window.open("https://docs.diekerit.de/monitoring-agent", "_blank")}
+                        >
                           Dokumentation
                         </Button>
                       </div>
@@ -456,7 +538,7 @@ const ServerMonitoring: React.FC = () => {
                     <CardTitle className="text-lg font-medium">DNS-Server</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {mockDnsServers.map((dns) => (
+                    {dnsServers.map((dns) => (
                       <button
                         key={dns.id}
                         className={`w-full text-left p-3 rounded-md transition-all flex items-center justify-between ${
@@ -476,7 +558,10 @@ const ServerMonitoring: React.FC = () => {
                       </button>
                     ))}
                     
-                    <Button className="w-full mt-4 glass border-white/10 hover:bg-white/10">
+                    <Button 
+                      className="w-full mt-4 glass border-white/10 hover:bg-white/10"
+                      onClick={() => setAddDnsServerDialogOpen(true)}
+                    >
                       DNS-Server hinzufügen
                     </Button>
                   </CardContent>
@@ -493,17 +578,18 @@ const ServerMonitoring: React.FC = () => {
                       </p>
                       
                       <div className="glass border-white/10 rounded-md p-3">
-                        <div className="flex items-center justify-between p-2 border-b border-white/10">
-                          <div className="text-sm">example.com</div>
-                          <Badge className="bg-emerald-500 border-0">Aktiv</Badge>
-                        </div>
-                        <div className="flex items-center justify-between p-2">
-                          <div className="text-sm">test-domain.de</div>
-                          <Badge className="bg-emerald-500 border-0">Aktiv</Badge>
-                        </div>
+                        {monitoredDomains.map((domain, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 border-b border-white/10 last:border-b-0">
+                            <div className="text-sm">{domain.domain}</div>
+                            <Badge className="bg-emerald-500 border-0">Aktiv</Badge>
+                          </div>
+                        ))}
                       </div>
                       
-                      <Button className="w-full diekerit-gradient-bg hover:opacity-90 glow-button">
+                      <Button 
+                        className="w-full diekerit-gradient-bg hover:opacity-90 glow-button"
+                        onClick={() => setAddDomainDialogOpen(true)}
+                      >
                         Domain hinzufügen
                       </Button>
                     </div>
@@ -747,6 +833,30 @@ const ServerMonitoring: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Dialoge für das Hinzufügen von Servern und Domains */}
+      <AddServerForm 
+        open={addServerDialogOpen} 
+        onOpenChange={setAddServerDialogOpen}
+        onAddServer={handleAddServer}
+      />
+      
+      <AddDnsServerForm 
+        open={addDnsServerDialogOpen} 
+        onOpenChange={setAddDnsServerDialogOpen}
+        onAddDnsServer={handleAddDnsServer}
+      />
+      
+      <AddDomainMonitorForm 
+        open={addDomainDialogOpen} 
+        onOpenChange={setAddDomainDialogOpen}
+        onAddDomain={handleAddDomain}
+      />
+      
+      <AgentConfigGenerator
+        open={agentConfigOpen}
+        onOpenChange={setAgentConfigOpen}
+      />
     </DiekerLayout>
   );
 };
