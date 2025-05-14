@@ -5,9 +5,23 @@ import { ServiceCard } from "@/components/ServiceCard";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "@/components/ui/use-toast";
+
+// Type definition for a service
+type ServiceStatus = "online" | "offline" | "warning";
+
+interface Service {
+  id: string;
+  name: string;
+  url: string;
+  status: ServiceStatus;
+  responseTime: number;
+  lastChecked: string;
+  uptime: number;
+}
 
 // Platzhalterdaten für das Dashboard
-const mockServices = [
+const mockServices: Service[] = [
   {
     id: "1",
     name: "Hauptwebsite",
@@ -53,10 +67,10 @@ const mockServices = [
     lastChecked: "2023-05-14 15:45:12",
     uptime: 99.95,
   }
-] as const;
+];
 
 const Dashboard = () => {
-  const [services, setServices] = useState<typeof mockServices>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Simuliere API-Abruf
@@ -64,6 +78,10 @@ const Dashboard = () => {
     setTimeout(() => {
       setServices(mockServices);
       setLoading(false);
+      toast({
+        title: "Daten geladen",
+        description: "Dashboard wurde aktualisiert",
+      });
     }, 1000);
   }, []);
 
