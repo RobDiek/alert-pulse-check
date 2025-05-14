@@ -4,7 +4,7 @@ import { DiekerLayout } from "@/components/DiekerLayout";
 import { ServiceCard } from "@/components/ServiceCard";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, RefreshCcw } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 import { MonitorDetail } from "@/components/MonitorDetail";
 
@@ -12,7 +12,7 @@ import { MonitorDetail } from "@/components/MonitorDetail";
 type ServiceStatus = "online" | "offline" | "warning";
 type ServiceType = "website" | "server" | "dns" | "database" | "api";
 
-interface Service {
+export interface Service {
   id: string;
   name: string;
   url: string;
@@ -107,33 +107,58 @@ const mockServices: Service[] = [
   }
 ];
 
+// Create a key for localStorage
+const SERVICES_STORAGE_KEY = "diekerit-monitor-services";
+
 const Dashboard = () => {
+  const location = useLocation();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filter, setFilter] = useState<"all" | ServiceType>("all");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
 
-  // Simuliere API-Abruf
+  // Load services from localStorage or use mock data
   useEffect(() => {
     const loadData = () => {
       setTimeout(() => {
-        setServices(mockServices);
+        // Try to load services from localStorage first
+        const savedServices = localStorage.getItem(SERVICES_STORAGE_KEY);
+        if (savedServices) {
+          setServices(JSON.parse(savedServices));
+        } else {
+          setServices(mockServices);
+          // Save mock services to localStorage for initial setup
+          localStorage.setItem(SERVICES_STORAGE_KEY, JSON.stringify(mockServices));
+        }
         setLoading(false);
-        toast({
-          title: "Daten geladen",
-          description: "Dashboard wurde aktualisiert",
-        });
+        
+        // Check if we need to show a notification for added service
+        if (location.state?.newServiceAdded) {
+          toast({
+            title: "Dienst hinzugefügt",
+            description: `${location.state.serviceName || 'Neuer Dienst'} wurde erfolgreich zur Überwachung hinzugefügt.`,
+          });
+        } else {
+          toast({
+            title: "Daten geladen",
+            description: "Dashboard wurde aktualisiert",
+          });
+        }
       }, 1000);
     };
     
     loadData();
-  }, []);
+  }, [location.state]);
 
   const handleRefresh = () => {
     setLoading(true);
     setTimeout(() => {
+      // Get latest services from localStorage
+      const savedServices = localStorage.getItem(SERVICES_STORAGE_KEY);
+      const servicesData = savedServices ? JSON.parse(savedServices) : mockServices;
+      
       // Simuliere Statusänderungen bei Aktualisierung
-      const updatedServices = mockServices.map(service => ({
+      const updatedServices = servicesData.map(service => ({
         ...service,
         lastChecked: new Date().toISOString().replace('T', ' ').substring(0, 19),
         responseTime: service.status !== 'offline' ? 
@@ -141,6 +166,9 @@ const Dashboard = () => {
       }));
       
       setServices(updatedServices);
+      // Save updated services to localStorage
+      localStorage.setItem(SERVICES_STORAGE_KEY, JSON.stringify(updatedServices));
+      
       setLoading(false);
       toast({
         title: "Aktualisiert",
