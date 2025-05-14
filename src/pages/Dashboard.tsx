@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, RefreshCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
+import { MonitorDetail } from "@/components/MonitorDetail";
 
 // Typdefinition für einen Dienst
 type ServiceStatus = "online" | "offline" | "warning";
@@ -110,6 +111,7 @@ const Dashboard = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filter, setFilter] = useState<"all" | ServiceType>("all");
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
 
   // Simuliere API-Abruf
   useEffect(() => {
@@ -147,6 +149,10 @@ const Dashboard = () => {
     }, 1500);
   };
 
+  const handleServiceClick = (service: Service) => {
+    setSelectedService(service);
+  };
+
   const filteredServices = filter === "all" 
     ? services 
     : services.filter(service => service.type === filter);
@@ -171,7 +177,7 @@ const Dashboard = () => {
           
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={handleRefresh} className="glass border-white/10 hover:bg-white/10">
-              <RefreshCcw className="h-4 w-4 mr-2" />
+              <RefreshCcw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Aktualisieren
             </Button>
             
@@ -282,6 +288,7 @@ const Dashboard = () => {
             filteredServices.map((service) => (
               <ServiceCard
                 key={service.id}
+                id={service.id}
                 name={service.name}
                 url={service.url}
                 status={service.status}
@@ -289,6 +296,7 @@ const Dashboard = () => {
                 lastChecked={service.lastChecked}
                 uptime={service.uptime}
                 type={service.type}
+                onClick={() => handleServiceClick(service)}
               />
             ))
           )}
@@ -309,6 +317,13 @@ const Dashboard = () => {
               </Button>
             </Link>
           </div>
+        )}
+        
+        {selectedService && (
+          <MonitorDetail 
+            monitor={selectedService} 
+            onClose={() => setSelectedService(null)} 
+          />
         )}
       </div>
     </DiekerLayout>

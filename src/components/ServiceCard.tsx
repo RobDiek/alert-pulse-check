@@ -5,6 +5,7 @@ import { StatusBadge } from "./StatusBadge";
 import { Cpu, Globe, Server, Database, Activity } from "lucide-react";
 
 interface ServiceCardProps {
+  id: string;
   name: string;
   url: string;
   status: "online" | "offline" | "warning";
@@ -12,16 +13,19 @@ interface ServiceCardProps {
   lastChecked: string;
   uptime: number;
   type?: "website" | "server" | "dns" | "database" | "api";
+  onClick?: () => void;
 }
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({
+  id,
   name,
   url,
   status,
   responseTime,
   lastChecked,
   uptime,
-  type = "website"
+  type = "website",
+  onClick
 }) => {
   // Icon basierend auf Typ auswählen
   const getIcon = () => {
@@ -35,7 +39,13 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   };
 
   return (
-    <Card className="monitor-card border-0 hover-scale">
+    <Card 
+      className="monitor-card border-0 hover-scale cursor-pointer" 
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && onClick?.()}
+    >
       <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
         <div className="flex items-center space-x-2">
           <div className={`p-1.5 rounded ${status === 'online' ? 'bg-emerald-500/20' : status === 'warning' ? 'bg-amber-500/20' : 'bg-rose-500/20'}`}>
