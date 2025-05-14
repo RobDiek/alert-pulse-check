@@ -19,6 +19,7 @@ export interface AddDomainMonitorFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddDomain: (data: DomainMonitorFormValues) => Promise<void>;
+  inline?: boolean;
 }
 
 const domainSchema = z.object({
@@ -26,7 +27,7 @@ const domainSchema = z.object({
   recordTypes: z.string().default("A,AAAA,MX,CNAME,TXT"),
 });
 
-export function AddDomainMonitorForm({ open, onOpenChange, onAddDomain }: AddDomainMonitorFormProps) {
+export function AddDomainMonitorForm({ open, onOpenChange, onAddDomain, inline = false }: AddDomainMonitorFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<z.infer<typeof domainSchema>>({
@@ -63,6 +64,61 @@ export function AddDomainMonitorForm({ open, onOpenChange, onAddDomain }: AddDom
     }
   }
 
+  const formContent = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="domain"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Domain</FormLabel>
+              <FormControl>
+                <Input placeholder="example.com" {...field} className="glass border-white/10" />
+              </FormControl>
+              <FormDescription>Domainname ohne http:// oder www.</FormDescription>
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="recordTypes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Zu überwachende Record-Typen</FormLabel>
+              <FormControl>
+                <Input placeholder="A,AAAA,MX,CNAME,TXT" {...field} className="glass border-white/10" />
+              </FormControl>
+              <FormDescription>Mit Komma getrennte Liste der DNS-Record-Typen</FormDescription>
+            </FormItem>
+          )}
+        />
+        
+        <div className={inline ? "" : "mt-6"}>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="diekerit-gradient-bg hover:opacity-90 glow-button w-full"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Wird hinzugefügt...
+              </>
+            ) : (
+              "Domain hinzufügen"
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+
+  if (inline) {
+    return formContent;
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass border-white/10 sm:max-w-[425px]">
@@ -73,54 +129,7 @@ export function AddDomainMonitorForm({ open, onOpenChange, onAddDomain }: AddDom
           </DialogDescription>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="domain"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Domain</FormLabel>
-                  <FormControl>
-                    <Input placeholder="example.com" {...field} className="glass border-white/10" />
-                  </FormControl>
-                  <FormDescription>Domainname ohne http:// oder www.</FormDescription>
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="recordTypes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Zu überwachende Record-Typen</FormLabel>
-                  <FormControl>
-                    <Input placeholder="A,AAAA,MX,CNAME,TXT" {...field} className="glass border-white/10" />
-                  </FormControl>
-                  <FormDescription>Mit Komma getrennte Liste der DNS-Record-Typen</FormDescription>
-                </FormItem>
-              )}
-            />
-            
-            <DialogFooter>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="diekerit-gradient-bg hover:opacity-90 glow-button"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Wird hinzugefügt...
-                  </>
-                ) : (
-                  "Domain hinzufügen"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        {formContent}
       </DialogContent>
     </Dialog>
   );

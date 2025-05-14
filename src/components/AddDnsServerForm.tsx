@@ -22,6 +22,7 @@ export interface AddDnsServerFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddDnsServer: (data: DnsServerFormValues) => Promise<void>;
+  inline?: boolean;
 }
 
 const dnsServerSchema = z.object({
@@ -31,7 +32,7 @@ const dnsServerSchema = z.object({
   provider: z.string().optional(),
 });
 
-export function AddDnsServerForm({ open, onOpenChange, onAddDnsServer }: AddDnsServerFormProps) {
+export function AddDnsServerForm({ open, onOpenChange, onAddDnsServer, inline = false }: AddDnsServerFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<z.infer<typeof dnsServerSchema>>({
@@ -72,6 +73,86 @@ export function AddDnsServerForm({ open, onOpenChange, onAddDnsServer }: AddDnsS
     }
   }
 
+  const formContent = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Primary DNS" {...field} className="glass border-white/10" />
+              </FormControl>
+              <FormDescription>Ein beschreibender Name für diesen DNS-Server</FormDescription>
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="hostname"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Hostname</FormLabel>
+              <FormControl>
+                <Input placeholder="ns1.example.com" {...field} className="glass border-white/10" />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="ip"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>IP-Adresse</FormLabel>
+              <FormControl>
+                <Input placeholder="192.168.1.5" {...field} className="glass border-white/10" />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="provider"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Anbieter (optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="Cloudflare, Google, etc." {...field} className="glass border-white/10" />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        
+        <div className={inline ? "" : "mt-6"}>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="diekerit-gradient-bg hover:opacity-90 glow-button w-full"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Wird hinzugefügt...
+              </>
+            ) : (
+              "DNS-Server hinzufügen"
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+
+  if (inline) {
+    return formContent;
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass border-white/10 sm:max-w-[425px]">
@@ -82,79 +163,7 @@ export function AddDnsServerForm({ open, onOpenChange, onAddDnsServer }: AddDnsS
           </DialogDescription>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Primary DNS" {...field} className="glass border-white/10" />
-                  </FormControl>
-                  <FormDescription>Ein beschreibender Name für diesen DNS-Server</FormDescription>
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="hostname"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Hostname</FormLabel>
-                  <FormControl>
-                    <Input placeholder="ns1.example.com" {...field} className="glass border-white/10" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="ip"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>IP-Adresse</FormLabel>
-                  <FormControl>
-                    <Input placeholder="192.168.1.5" {...field} className="glass border-white/10" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="provider"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Anbieter (optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Cloudflare, Google, etc." {...field} className="glass border-white/10" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            
-            <DialogFooter>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="diekerit-gradient-bg hover:opacity-90 glow-button"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Wird hinzugefügt...
-                  </>
-                ) : (
-                  "DNS-Server hinzufügen"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        {formContent}
       </DialogContent>
     </Dialog>
   );

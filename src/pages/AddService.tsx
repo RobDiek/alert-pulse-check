@@ -10,6 +10,9 @@ import { AddDnsServerForm, DnsServerFormValues } from "@/components/AddDnsServer
 import { AddDomainMonitorForm, DomainMonitorFormValues } from "@/components/AddDomainMonitorForm";
 import { Service } from "./Dashboard";
 
+// Import ServiceType from Dashboard or define it here
+type ServiceType = "website" | "server" | "dns" | "database" | "api";
+
 // Existing storage key to keep consistency
 const SERVICES_STORAGE_KEY = "diekerit-monitor-services";
 
@@ -160,7 +163,6 @@ const AddService = () => {
                   open={true}
                   onOpenChange={() => {}}
                   onAddDomain={handleAddDomain}
-                  inline={true}
                 />
               </TabsContent>
               
@@ -169,7 +171,6 @@ const AddService = () => {
                   open={true}
                   onOpenChange={() => {}}
                   onAddServer={handleAddServer}
-                  inline={true}
                 />
               </TabsContent>
               
@@ -178,7 +179,6 @@ const AddService = () => {
                   open={true}
                   onOpenChange={() => {}}
                   onAddDnsServer={handleAddDnsServer}
-                  inline={true}
                 />
               </TabsContent>
             </Tabs>
