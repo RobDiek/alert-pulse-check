@@ -47,7 +47,14 @@ export function AddDnsServerForm({ open, onOpenChange, onAddDnsServer }: AddDnsS
   async function onSubmit(data: z.infer<typeof dnsServerSchema>) {
     try {
       setIsSubmitting(true);
-      await onAddDnsServer(data);
+      // Make sure all required fields are passed to onAddDnsServer
+      const formValues: DnsServerFormValues = {
+        name: data.name,
+        hostname: data.hostname,
+        ip: data.ip,
+        provider: data.provider
+      };
+      await onAddDnsServer(formValues);
       form.reset();
       onOpenChange(false);
       toast({

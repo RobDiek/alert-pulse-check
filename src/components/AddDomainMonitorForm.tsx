@@ -40,7 +40,12 @@ export function AddDomainMonitorForm({ open, onOpenChange, onAddDomain }: AddDom
   async function onSubmit(data: z.infer<typeof domainSchema>) {
     try {
       setIsSubmitting(true);
-      await onAddDomain(data);
+      // Make sure all required fields are passed to onAddDomain
+      const formValues: DomainMonitorFormValues = {
+        domain: data.domain,
+        recordTypes: data.recordTypes
+      };
+      await onAddDomain(formValues);
       form.reset();
       onOpenChange(false);
       toast({

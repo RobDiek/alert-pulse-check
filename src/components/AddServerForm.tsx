@@ -53,7 +53,15 @@ export function AddServerForm({ open, onOpenChange, onAddServer }: AddServerForm
   async function onSubmit(data: z.infer<typeof serverSchema>) {
     try {
       setIsSubmitting(true);
-      await onAddServer(data);
+      // Make sure all required fields are passed to onAddServer
+      const formValues: ServerFormValues = {
+        name: data.name,
+        hostname: data.hostname,
+        ip: data.ip,
+        type: data.type,
+        port: data.port
+      };
+      await onAddServer(formValues);
       form.reset(); // Formular zurücksetzen nach erfolgreicher Übermittlung
       onOpenChange(false);
       toast({
